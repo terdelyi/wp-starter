@@ -1,0 +1,5 @@
+public
+vendor
+wp-content
+.env
+composer.lock
