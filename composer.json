@@ -20,9 +20,9 @@
         }
     },
     "scripts": {
-        "post-root-package-install": [
-          "php -r \"copy('.env.example', '.env');\"",
-          "touch plugin.txt"
+        "post-install-cmd": [
+          "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+          "touch wp-plugins.txt;"
         ]
     }
 }

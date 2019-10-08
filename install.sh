@@ -1,38 +1,36 @@
 #!/usr/bin/env bash
-# WordPress install script
-# Tamas Erdelyi <terdelyi@gmail.com>
-# (c) 2019
-
-# Exit on error
-set -o errexit
-
-if [ ! -d "vendor" ]; then
-	echo -e "\e[101mERROR: Run composer install first!\033[0m"
-    exit 1
-fi
+# WordPress install script by Tamas Erdelyi <terdelyi@gmail.com> (c) 2019
 
 # Setup WP CLI path
-WP_CMD='vendor/bin/wp'
+WP_CMD="vendor/bin/wp";
+
+# Check is Composer installed
+if [ ! -d "vendor" ] || [ ! -f "${WP_CMD}" ]; then
+	printf -- "\e[101mERROR: We need WP CLI, run composer install first!\033[0m\n"
+    exit 1
+fi
 
 # Include env file
 . .env
 
 # Starts a new block
 startblock () {
-	echo -e "\e[95m===== $1\033[0m"
+	printf -- "\e[95m===== $1\033[0m\n"
 }
 
 # Ends a block
 endblock () {
-	echo
+	printf -- "\n";
 }
 
 # Download WP core files into the wp-cli path
 clear
 startblock "Download WordPress files"
 	${WP_CMD} core download
-	mv ${WP_PATH}/wp-content ./
-	ln -s $PWD/wp-content $PWD/${WP_PATH}
+	if [ ! -d "$PWD/wp-content" ]; then
+		mv ${WP_PATH}/wp-content ./
+		ln -s $PWD/wp-content $PWD/${WP_PATH}
+	fi
 endblock
 
 # Install WP to the database
@@ -41,8 +39,12 @@ startblock "Install WordPress into the database"
 endblock
 
 # Install required plugins
-if [ -f "plugins.txt" ]; then
+PLUGINS='wp-plugins.txt';
+if [ -f "${PLUGINS}" ] && [ ! -z "${PLUGINS}" ]; then
 	startblock "Install plugins defined in plugins.txt"
-	    ${WP_CMD} plugin install --activate $(<plugins.txt)
+	    ${WP_CMD} plugin install --activate $(<"${PLUGINS}")
 	endblock
 fi
+
+# Bye-bye!
+exit 0;
